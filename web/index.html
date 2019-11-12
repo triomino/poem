@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script src="index.js"></script>
+    <style>
+      .confessio span + span {
+        margin-left: 0.5em;
+      }
+      .multiple_entry {
+        background-color: red;
+      }
+      .no_entry {
+        background-color: gray;
+      }
+      .confessio span:hover {
+        font-size: 160%;
+        cursor: pointer;
+      }
+      .entry {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        max-width: 50%;
+        /* position: -webkit-sticky; */
+      }
+    </style>
+  </head>
+<body onload="fill_options()">
+  Red -> multiple entries. Gray -> entry not found.
+  <br>
+  Select section:
+  <select id="section"></select>
+  <button onClick="get_books()">Submit</button>
+  <div id="confessio" class="confessio"></div>
+  <div id="entry" class="entry">entries</div>
+</body>
+</html>
