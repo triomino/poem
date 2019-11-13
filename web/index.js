@@ -32,25 +32,36 @@ function set_loading() {
 
 function display_entries(data, eid) {
     const root = document.getElementById('entry')
+    nodes = {}
+    let cur = null
     JSON.parse(data).forEach(([id, ppt, forms, etymology, definition]) => {
-        if (id == eid) {
-            marker = document.createElement('div')
-            marker.innerText = 'This one is chosen:'
-            root.appendChild(marker)
+        if (!nodes[id]) {
+            cur = document.createElement('div')
+            cur.classList.add('entry')
+            nodes[id] = cur
+            if (id == eid) {
+                marker = document.createElement('div')
+                marker.innerText = 'This one is chosen.'
+                cur.appendChild(marker)
+            }
+            ppt_dom = document.createElement('div')
+            ppt_dom.innerText = ppt
+            f_dom = document.createElement('div')
+            f_dom.innerHTML = forms
+            em_dom = document.createElement('div')
+            em_dom.innerHTML = etymology
+            cur.appendChild(ppt_dom)
+            cur.appendChild(f_dom)
+            cur.appendChild(em_dom)
+        } else {
+            cur = nodes[id]
         }
-        ppt_dom = document.createElement('div')
-        ppt_dom.innerText = ppt
-        f_dom = document.createElement('div')
-        f_dom.innerHTML = forms
-        em_dom = document.createElement('div')
-        em_dom.innerHTML = etymology
         def_dom = document.createElement('div')
         def_dom.innerHTML = definition
-        root.appendChild(ppt_dom)
-        root.appendChild(f_dom)
-        root.appendChild(em_dom)
-        root.appendChild(def_dom)
-        // TODO: merge definitions to one entry
+        cur.appendChild(def_dom)
+    })
+    Object.values(nodes).forEach((node) => {
+        root.appendChild(node)
     })
 }
 

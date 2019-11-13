@@ -15,7 +15,7 @@
         font-size: 160%;
         cursor: pointer;
       }
-      .entry {
+      .entries {
         position: fixed;
         top: 10px;
         right: 10px;
@@ -23,6 +23,12 @@
         max-height: 700px;
         overflow-y: auto;
         /* position: -webkit-sticky; */
+      }
+      .entries div + div {
+        margin-top: 1em
+      }
+      .entry {
+        border-style: solid;
       }
     </style>
   </head>
@@ -33,6 +39,6 @@
   <select id="section"></select>
   <button onClick="get_books()">Submit</button>
   <div id="confessio" class="confessio"></div>
-  <div id="entry" class="entry">entries</div>
+  <div id="entry" class="entries">entries</div>
 </body>
 </html>
