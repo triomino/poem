@@ -20,45 +20,105 @@ function fill_options() {
     }
 }
 
+function load_cache(key) {
+    return localStorage[key]
+}
+
+const bookKey = 'selectedBook'
+function init() {
+    fill_options()
+    last_book_value = load_cache(bookKey)
+    if (last_book_value in sec_list) {
+        document.getElementById('section').value = last_book_value
+    }
+}
+
+function save_cache(key, value) {
+    localStorage.setItem(key, value)
+}
+
 function get_books() {
     set_loading()
     const sec = document.getElementById('section').value
-    httpGet('/confessio?section=' + sec, display)
+    if (sec in sec_list) {
+        httpGet('/confessio?section=' + sec, display)
+    }
+    save_cache(bookKey, sec)
 }
 
 function set_loading() {
 
 }
 
+let nodes = {}
+let def = {}
+
 function display_entries(data, eid) {
     const root = document.getElementById('entry')
-    nodes = {}
     let cur = null
-    JSON.parse(data).forEach(([id, ppt, forms, etymology, definition]) => {
+    nodes = {}
+    def = {}
+    JSON.parse(data).forEach(([id, ppt, forms, etymology, definition, word]) => {
         if (!nodes[id]) {
             cur = document.createElement('div')
             cur.classList.add('entry')
-            nodes[id] = cur
             if (id == eid) {
-                marker = document.createElement('div')
+                const marker = document.createElement('div')
                 marker.innerText = 'This one is chosen.'
                 cur.appendChild(marker)
             }
-            ppt_dom = document.createElement('div')
+            const word_dom = document.createElement('span')
+            word_dom.classList.add('HI_B')
+            word_dom.innerText = word
+            cur.appendChild(word_dom)
+            const ppt_dom = document.createElement('span')
             ppt_dom.innerText = ppt
-            f_dom = document.createElement('div')
-            f_dom.innerHTML = forms
-            em_dom = document.createElement('div')
-            em_dom.innerHTML = etymology
             cur.appendChild(ppt_dom)
-            cur.appendChild(f_dom)
-            cur.appendChild(em_dom)
-        } else {
-            cur = nodes[id]
+            // row1
+            const f_dom = document.createElement('td')
+            f_dom.innerHTML = forms
+            const form_head = document.createElement('td')
+            form_head.innerText = 'Forms'
+            const row1_dom = document.createElement('tr')
+            row1_dom.appendChild(form_head)
+            row1_dom.appendChild(f_dom)
+            // row2
+            const em_dom = document.createElement('td')
+            em_dom.innerHTML = etymology
+            const em_head = document.createElement('td')
+            em_head.innerText = 'Etymology'
+            const row2_dom = document.createElement('tr')
+            row2_dom.appendChild(em_head)
+            row2_dom.appendChild(em_dom)
+            // table
+            const table_dom = document.createElement('table')
+            table_dom.appendChild(row1_dom)
+            table_dom.appendChild(row2_dom)
+            cur.appendChild(table_dom)
+            // collapse
+            const show_link = document.createElement('button')
+            const hide_link = document.createElement('button')
+            show_link.onclick = () => {
+                nodes[id].appendChild(hide_link)
+                nodes[id].appendChild(def[id])
+                nodes[id].removeChild(show_link)
+            }
+            show_link.innerText = 'Show Definitions'
+            hide_link.onclick = () => {
+                nodes[id].appendChild(show_link)
+                nodes[id].removeChild(def[id])
+                nodes[id].removeChild(hide_link)
+            }
+            hide_link.innerText = 'Hide Definitions'
+            cur.appendChild(show_link)
+            // put <id, node>
+            nodes[id] = cur
+            def[id] = document.createElement('div')
+            def[id].id = 'def' + id
         }
-        def_dom = document.createElement('div')
+        const def_dom = document.createElement('div')
         def_dom.innerHTML = definition
-        cur.appendChild(def_dom)
+        def[id].appendChild(def_dom)
     })
     Object.values(nodes).forEach((node) => {
         root.appendChild(node)
@@ -71,7 +131,16 @@ function get_entries(word, wid, eid) {
     httpGet('/entry?word=' + wid, (data) => display_entries(data, eid, e))
 }
 
-function create_word(word, tot, e_id, wid) {
+let last_chosen = null
+function set_selected_word(selected) {
+    if (last_chosen) {
+        last_chosen.classList.toggle('big_word')
+    }
+    selected.classList.toggle('big_word')
+    last_chosen = selected
+}
+
+function create_word(row, column, word, tot, e_id, wid) {
     const res = document.createElement('span')
     res.innerText = word
     if (tot > 1) {
@@ -79,7 +148,10 @@ function create_word(word, tot, e_id, wid) {
     } else if (tot === 0 || !e_id) {
         res.classList.add('no_entry')
     }
-    res.onclick = () => get_entries(word, wid, e_id)
+    res.onclick = () => {
+        set_selected_word(res)
+        get_entries(word, wid, e_id) 
+    }
     return res
 }
 
@@ -94,7 +166,7 @@ function display(data) {
             cur = document.createElement('div')
             cur.row = r
         }
-        cur.appendChild(create_word(word, e_cnt, e_sel, wid))
+        cur.appendChild(create_word(r, c, word, e_cnt, e_sel, wid))
     })
     root.appendChild(cur)
 }

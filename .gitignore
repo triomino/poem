@@ -1,3 +1,5 @@
 html/*.html
 __pycache__
 .ipynb_checkpoints
+html.zip
+*.ipynb

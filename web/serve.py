@@ -27,7 +27,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path.startswith('/entry'):
             query = urlparse(path).query
             q = dict(qc.split("=") for qc in query.split("&"))
-            sql = ' '.join(['SELECT id, property, forms, etymology, content',
+            sql = ' '.join(['SELECT id, property, forms, etymology, content, word',
                             'FROM entry LEFT JOIN definition ON entry.id = definition.eid',
                             'WHERE word = %s'])
             response = run_sql(sql, q['word'])
